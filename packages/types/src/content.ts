@@ -58,11 +58,14 @@ export interface Article {
   title: string;
   summary: string;
   publishedAt: string;
+  updatedAt: string;
   readingTime: string;
   authors: ArticleAuthor[];
   tags: string[];
   coverAccent: string;
   coverImageUrl?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   body: string;
 }
 

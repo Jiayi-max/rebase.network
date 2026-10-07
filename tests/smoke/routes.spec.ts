@@ -58,8 +58,27 @@ test('pages expose canonical and social metadata', async ({ page }) => {
     'href',
     `https://rebase.network${articleHref}`,
   );
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /social-card\.svg|https?:\/\//);
   await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute('content', /可阅读、可订阅/);
+  await expect(page.locator('meta[property="article:published_time"]')).toHaveAttribute('content', /2026-04-05/);
+  await expect(page.locator('meta[property="article:modified_time"]')).toHaveAttribute('content', /\d{4}-\d{2}-\d{2}/);
+
+  const structuredData = await page.locator('script[type="application/ld+json"]').textContent();
+  expect(structuredData).toBeTruthy();
+  expect(JSON.parse(structuredData ?? '{}')).toMatchObject({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: '把 Rebase 做成一个持续更新的社区媒体站点',
+    inLanguage: 'zh-CN',
+    mainEntityOfPage: {
+      '@id': `https://rebase.network${articleHref}`,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Rebase',
+    },
+  });
 });
 
 test('redesigned community UX avoids misleading public actions', async ({ page }) => {
