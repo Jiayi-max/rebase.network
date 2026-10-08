@@ -233,11 +233,14 @@ export const listPublicArticles = async () => {
     title: row.title,
     summary: row.summary,
     publishedAt: toIsoString(row.publishedAt),
+    updatedAt: toIsoString(row.updatedAt) ?? toIsoString(row.publishedAt),
     readingTime: row.readingTime,
     authors: Array.isArray(row.authorsJson) ? row.authorsJson : [],
     tags: Array.isArray(row.tagsJson) ? row.tagsJson : [],
     coverAccent: row.coverAccent,
     coverImageUrl: row.coverAssetId ? assetUrls.get(row.coverAssetId) : undefined,
+    seoTitle: row.seoTitle ?? '',
+    seoDescription: row.seoDescription ?? '',
     body: row.bodyMarkdown,
   }));
 };
@@ -269,11 +272,14 @@ export const getPublicArticleByPublicNumber = async (value: string | number) => 
     title: row.title,
     summary: row.summary,
     publishedAt: toIsoString(row.publishedAt),
+    updatedAt: toIsoString(row.updatedAt) ?? toIsoString(row.publishedAt),
     readingTime: row.readingTime,
     authors: Array.isArray(row.authorsJson) ? row.authorsJson : [],
     tags: Array.isArray(row.tagsJson) ? row.tagsJson : [],
     coverAccent: row.coverAccent,
     coverImageUrl: row.coverAssetId ? assetUrls.get(row.coverAssetId) : undefined,
+    seoTitle: row.seoTitle ?? '',
+    seoDescription: row.seoDescription ?? '',
     body: row.bodyMarkdown,
   };
 };

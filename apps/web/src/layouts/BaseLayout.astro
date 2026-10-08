@@ -10,6 +10,10 @@ interface Props {
   description?: string;
   socialImage?: string;
   noindex?: boolean;
+  openGraphType?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  structuredData?: Record<string, unknown>;
 }
 
 const {
@@ -18,12 +22,22 @@ const {
   description = site.description,
   socialImage,
   noindex = false,
+  openGraphType = 'website',
+  publishedTime,
+  modifiedTime,
+  structuredData,
 } = Astro.props;
 
 const canonicalPath = Astro.url.pathname === '/' ? '/' : Astro.url.pathname.replace(/\/+$/, '');
 const canonicalUrl = new URL(canonicalPath, site.primaryDomain).toString();
 const socialImageUrl = new URL(socialImage ?? '/social-card.svg', site.primaryDomain).toString();
 const robots = noindex ? 'noindex, nofollow' : 'index, follow';
+const serializedStructuredData = structuredData
+  ? JSON.stringify(structuredData)
+      .replaceAll('<', '\\u003c')
+      .replaceAll('\u2028', '\\u2028')
+      .replaceAll('\u2029', '\\u2029')
+  : '';
 ---
 
 <!doctype html>
@@ -38,9 +52,11 @@ const robots = noindex ? 'noindex, nofollow' : 'index, follow';
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:locale" content="zh_CN" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={openGraphType} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={socialImageUrl} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
@@ -48,6 +64,7 @@ const robots = noindex ? 'noindex, nofollow' : 'index, follow';
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/brand/rebase-logo-square.svg" />
     <link rel="alternate" type="application/rss+xml" title="Rebase RSS" href="/rss.xml" />
+    {structuredData && <script is:inline type="application/ld+json" set:html={serializedStructuredData} />}
   </head>
   <body>
     <SiteHeader site={site} />

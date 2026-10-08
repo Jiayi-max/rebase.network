@@ -16,6 +16,38 @@ const articleHeroMeta = article ? [formatDate(article.publishedAt), article.read
 const articleHeroActions = [
   { href: '/articles/rss.xml', label: '订阅文章 RSS', showIcon: false, secondary: true },
 ];
+const pageTitle = article?.seoTitle?.trim() || article?.title || '文章未找到';
+const pageDescription = article?.seoDescription?.trim() || article?.summary || '你访问的文章暂时无法找到。';
+const articlePath = article ? getArticlePath(article.publicNumber, article.slug) : '';
+const articleCanonicalUrl = article ? new URL(articlePath, site.primaryDomain).toString() : '';
+const articleSocialImage = article?.coverImageUrl ?? DEFAULT_ARTICLE_COVER_PATH;
+const articleSocialImageUrl = new URL(articleSocialImage, site.primaryDomain).toString();
+const articleStructuredData = article
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: article.title,
+      description: pageDescription,
+      image: [articleSocialImageUrl],
+      datePublished: article.publishedAt,
+      dateModified: article.updatedAt || article.publishedAt,
+      inLanguage: 'zh-CN',
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': articleCanonicalUrl,
+      },
+      author: article.authors.map((author) => ({
+        '@type': 'Person',
+        name: author.name,
+      })),
+      publisher: {
+        '@type': 'Organization',
+        name: site.name,
+        url: site.primaryDomain,
+      },
+      keywords: article.tags.join(', '),
+    }
+  : undefined;
 
 if (!article) {
   Astro.response.status = 404;
@@ -24,10 +56,14 @@ if (!article) {
 
 <BaseLayout
   site={site}
-  title={article ? article.title : '文章未找到'}
-  description={article ? article.summary : '你访问的文章暂时无法找到。'}
-  socialImage={article?.coverImageUrl ?? DEFAULT_ARTICLE_COVER_PATH}
+  title={pageTitle}
+  description={pageDescription}
+  socialImage={articleSocialImage}
   noindex={!article}
+  openGraphType={article ? 'article' : 'website'}
+  publishedTime={article?.publishedAt}
+  modifiedTime={article?.updatedAt || article?.publishedAt}
+  structuredData={articleStructuredData}
 >
   {article ? (
     <>
